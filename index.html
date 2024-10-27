@@ -23,27 +23,31 @@
         th {
             background-color: #f2f2f2;
         }
-        /* Set different widths for each column */
+        /* Set widths for each column */
         td:nth-child(1) { width: 30%; } /* Ingredient */
-        td:nth-child(2) { width: 20%; } /* Amount */
-        td:nth-child(3) { width: 15%; } /* Unit */
-        td:nth-child(4) { width: 25%; } /* Location */
-        td:nth-child(5) { width: 10%; } /* Action */
+        td:nth-child(2), td:nth-child(3) { width: 20%; } /* Amount and Unit */
+        td:nth-child(4), td:nth-child(5) { width: 15%; } /* Location and Action */
         
-        /* Responsive design adjustments */
+        /* Input styles */
         input[type="text"], input[type="number"] { 
             width: 100%; /* Inputs take full width */
             box-sizing: border-box; /* Ensures padding is included in the width */
         }
 
-        /* Form styling */
+        /* Adjust the form input widths on mobile */
         #addItemForm {
             display: flex;
             flex-direction: column; /* Stack form elements vertically */
             gap: 10px; /* Space between form elements */
         }
-        
-        /* Adjust the form input widths on mobile */
+
+        /* Additional styling for table rows */
+        .stacked {
+            display: flex;
+            flex-direction: column; /* Stack inputs vertically */
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 600px) {
             td {
                 font-size: 14px; /* Reduce font size for smaller screens */
@@ -83,10 +87,10 @@
             shoppingListData.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" value="${row.ingredient}" onchange="updateItem(${index}, 'ingredient', this.value)"></td>
-                    <td><input type="number" value="${row.amount}" onchange="updateItem(${index}, 'amount', this.value)"></td>
-                    <td>${row.unit}</td>
-                    <td><input type="text" value="${row.location}" onchange="updateItem(${index}, 'location', this.value)"></td>
+                    <td>${row.ingredient}</td>
+                    <td class="stacked"><input type="number" value="${row.amount}" onchange="updateItem(${index}, 'amount', this.value)"></td>
+                    <td class="stacked">${row.unit}</td>
+                    <td class="stacked"><input type="text" value="${row.location}" onchange="updateItem(${index}, 'location', this.value)"></td>
                     <td><button onclick="removeItem(${index})">Remove</button></td>
                 `;
                 tableBody.appendChild(tr);
@@ -137,6 +141,7 @@
     </script>
 </body>
 </html>
+
 
 
 
