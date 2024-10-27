@@ -23,16 +23,16 @@
         th {
             background-color: #f2f2f2;
         }
-        /* Set different widths for each column */
-        td:nth-child(1) { width: 30%; } /* Ingredient */
-        td:nth-child(2) { width: 5%; } /* Amount */
-        td:nth-child(3) { width: 10%; } /* Unit */
-        td:nth-child(4) { width: 30%; } /* Location */
-        td:nth-child(5) { width: 10%; } /* Action */
+        /* Set default widths for each column */
+        td:nth-child(1) { width: auto; } /* Ingredient */
+        td:nth-child(2) { width: auto; } /* Amount */
+        td:nth-child(3) { width: auto; } /* Unit */
+        td:nth-child(4) { width: auto; } /* Location */
+        td:nth-child(5) { width: auto; } /* Action */
         
         /* Input styles */
         input[type="text"], input[type="number"] { 
-            width: 90%; /* Inputs take full width of the cell with a margin */
+            width: 95%; /* Inputs take full width of the cell with a margin */
             box-sizing: border-box; /* Ensures padding is included in the width */
         }
 
@@ -84,7 +84,33 @@
                 `;
                 tableBody.appendChild(tr);
             });
+            setDynamicColumnWidths();
             window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function setDynamicColumnWidths() {
+            const table = document.getElementById('shoppingListTable');
+            const rows = table.getElementsByTagName('tr');
+            const colCount = rows[0].cells.length;
+
+            for (let colIndex = 0; colIndex < colCount; colIndex++) {
+                let maxWidth = 0;
+
+                // Loop through each row in the column to find the max width
+                for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+                    const cell = rows[rowIndex].cells[colIndex];
+                    const cellContentWidth = cell.offsetWidth; // Get the width of the cell content
+
+                    // Compare and set the max width
+                    if (cellContentWidth > maxWidth) {
+                        maxWidth = cellContentWidth;
+                    }
+                }
+
+                // Set the width of the column
+                table.style.setProperty(`--col-${colIndex}-width`, `${maxWidth}px`);
+                rows[0].cells[colIndex].style.width = `${maxWidth}px`; // Set header width
+            }
         }
 
         function removeItem(index) {
@@ -130,6 +156,7 @@
     </script>
 </body>
 </html>
+
 
 
 
