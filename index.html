@@ -57,6 +57,12 @@
         function populateTable() {
             const tableBody = document.querySelector('#tableBody');
             tableBody.innerHTML = ''; // Clear the existing rows
+
+            // Sort the data by location before populating
+            shoppingListData.sort((a, b) => {
+                return a.location.localeCompare(b.location); // Sort by location
+            });
+
             shoppingListData.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -113,6 +119,7 @@
     </script>
 </body>
 </html>
+
 
 
 
