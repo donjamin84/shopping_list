@@ -68,13 +68,11 @@
                 `;
                 tableBody.appendChild(tr);
             });
-            // Remove window.scrollTo here to maintain the current scroll position on removal
         }
 
         function removeItem(index) {
             shoppingListData.splice(index, 1); // Remove item from the array
             populateTable(); // Refresh the table
-            // Removed window.scrollTo to stay at the same scroll position
         }
 
         document.getElementById('addItemForm').addEventListener('submit', function(event) {
@@ -87,13 +85,12 @@
             };
             shoppingListData.push(newItem); // Add new item to the list
             populateTable(); // Update the table with new data
-            window.scrollTo(0, document.body.scrollHeight); // Scroll down only when adding an item
             this.reset(); // Clear the form fields
         });
 
         // Fetch the CSV data when the page loads
         window.onload = function() {
-            fetch('shopping_list.csv') // Change to your CSV file path if needed
+            fetch('https://raw.githubusercontent.com/donjamin84/shopping_list/refs/heads/main/shopping_list.csv')
                 .then(response => response.text())
                 .then(data => {
                     const rows = data.split('\n');
@@ -116,6 +113,7 @@
     </script>
 </body>
 </html>
+
 
 
 
