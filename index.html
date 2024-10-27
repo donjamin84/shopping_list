@@ -10,46 +10,11 @@
         table { width: 95%; border-collapse: collapse; margin-bottom: 20px; }
         th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
         th { background-color: #f2f2f2; }
-        td:nth-child(1) { width: 25%; }
-        td:nth-child(2) { width: 15%; }
-        td:nth-child(3) { width: 15%; }
-        td:nth-child(4) { width: 30%; }
-        td:nth-child(5) { width: 10%; }
+        td.hidden { display: none; } /* Hidden columns */
         .form-group { margin-bottom: 10px; }
         #addItemForm { display: flex; flex-wrap: wrap; gap: 10px; }
         .action-icons i { cursor: pointer; margin-right: 10px; }
-        .modal {
-            display: none; 
-            position: fixed; 
-            z-index: 1; 
-            left: 0; 
-            top: 0; 
-            width: 100%; 
-            height: 100%; 
-            overflow: auto; 
-            background-color: rgb(0,0,0); 
-            background-color: rgba(0,0,0,0.4); 
-            padding-top: 60px; 
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto; 
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; 
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+        .location-group { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
@@ -57,11 +22,9 @@
     <table id="shoppingListTable">
         <thead>
             <tr>
-                <th>Ingredient</th>
-                <th>Amount</th>
-                <th>Unit</th>
-                <th>Location</th>
-                <th>Action</th>
+                <th class="hidden">Location</th>
+                <th>Details</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -76,61 +39,58 @@
             <input type="number" id="amount" placeholder="Amount" required>
         </div>
         <div class="form-group">
-            <input type="text" id="unit" placeholder="Unit">
+            <input type="text" id="unit" placeholder="Unit"> <!-- Optional -->
         </div>
         <div class="form-group">
-            <input type="text" id="location" placeholder="Location">
+            <input type="text" id="location" placeholder="Location" required> <!-- Required -->
         </div>
         <button type="submit">Add Item</button>
     </form>
 
-    <!-- Modal for editing -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Edit Item</h2>
-            <div class="form-group">
-                <input type="text" id="editIngredient" placeholder="Ingredient" required>
-            </div>
-            <div class="form-group">
-                <input type="number" id="editAmount" placeholder="Amount" required>
-            </div>
-            <div class="form-group">
-                <input type="text" id="editUnit" placeholder="Unit">
-            </div>
-            <div class="form-group">
-                <input type="text" id="editLocation" placeholder="Location">
-            </div>
-            <button id="updateButton">Update Item</button>
-        </div>
-    </div>
-
     <script>
         const shoppingListData = [];
-        let currentEditIndex = -1; // To keep track of the item being edited
 
         function populateTable() {
             const tableBody = document.querySelector('#tableBody');
-            tableBody.innerHTML = '';
-            shoppingListData.forEach((row, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${row.ingredient}</td>
-                    <td>${row.amount}</td>
-                    <td>${row.unit}</td>
-                    <td>${row.location}</td>
-                    <td class="action-icons">
-                        <i class="fas fa-edit" onclick="openEditModal(${index})" title="Edit"></i>
-                        <i class="fas fa-trash" onclick="removeItem(${index})" title="Remove"></i>
+            tableBody.innerHTML = ''; // Clear the existing rows
+
+            // Group data by location
+            const groupedData = shoppingListData.reduce((acc, row) => {
+                if (!acc[row.location]) {
+                    acc[row.location] = [];
+                }
+                acc[row.location].push(row);
+                return acc;
+            }, {});
+
+            // Create table rows
+            for (const location in groupedData) {
+                const locationItems = groupedData[location];
+
+                // Create a new row for the location
+                const trLocation = document.createElement('tr');
+                trLocation.innerHTML = `
+                    <td class="hidden">${location}</td>
+                    <td>
+                        <div class="location-group">
+                            <strong>${location}</strong><br>
+                            ${locationItems.map(item => `
+                                <div>
+                                    ${item.ingredient} - ${item.amount} ${item.unit}
+                                    <i class="fas fa-edit" onclick="openEditModal(${shoppingListData.indexOf(item)})"></i>
+                                    <i class="fas fa-trash" onclick="removeItem(${shoppingListData.indexOf(item)})"></i>
+                                </div>
+                            `).join('')}
+                        </div>
                     </td>
+                    <td class="hidden"></td>
                 `;
-                tableBody.appendChild(tr);
-            });
+                tableBody.appendChild(trLocation);
+            }
             window.scrollTo(0, document.body.scrollHeight);
         }
 
         function openEditModal(index) {
-            currentEditIndex = index; // Save the index of the item being edited
             const item = shoppingListData[index];
             document.getElementById('editIngredient').value = item.ingredient;
             document.getElementById('editAmount').value = item.amount;
@@ -140,8 +100,8 @@
         }
 
         function removeItem(index) {
-            shoppingListData.splice(index, 1);
-            populateTable();
+            shoppingListData.splice(index, 1); // Remove item from the array
+            populateTable(); // Refresh the table
         }
 
         document.getElementById('addItemForm').addEventListener('submit', function(event) {
@@ -150,28 +110,12 @@
                 ingredient: document.getElementById('ingredient').value,
                 amount: document.getElementById('amount').value,
                 unit: document.getElementById('unit').value || '',
-                location: document.getElementById('location').value || ''
+                location: document.getElementById('location').value // Required
             };
-            shoppingListData.push(newItem);
+            shoppingListData.push(newItem); // Add new item to the list
             populateTable(); // Update the table with new data
             this.reset(); // Clear the form fields
         });
-
-        document.querySelector('.close').onclick = function() {
-            document.getElementById('editModal').style.display = 'none'; // Hide modal
-        }
-
-        document.getElementById('updateButton').onclick = function() {
-            const updatedItem = {
-                ingredient: document.getElementById('editIngredient').value,
-                amount: document.getElementById('editAmount').value,
-                unit: document.getElementById('editUnit').value || '',
-                location: document.getElementById('editLocation').value || ''
-            };
-            shoppingListData[currentEditIndex] = updatedItem; // Update the item in the array
-            populateTable(); // Refresh the table
-            document.getElementById('editModal').style.display = 'none'; // Hide modal
-        }
 
         // Fetch the CSV data when the page loads
         window.onload = function() {
@@ -179,7 +123,6 @@
                 .then(response => response.text())
                 .then(data => {
                     const rows = data.split('\n');
-                    // Start from row 2
                     for (let i = 1; i < rows.length; i++) { // Adjusted to start from row 2
                         if (rows[i]) {
                             const columns = rows[i].split(',');
@@ -198,6 +141,7 @@
     </script>
 </body>
 </html>
+
 
 
 
