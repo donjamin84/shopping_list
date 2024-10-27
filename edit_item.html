@@ -59,19 +59,20 @@
         }
 
         document.getElementById('editItemForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+            event.preventDefault(); // Prevent the form from submitting normally
             const updatedItem = {
                 ingredient: document.getElementById('ingredient').value,
                 amount: document.getElementById('amount').value,
-                unit: document.getElementById('unit').value || '',
-                location: document.getElementById('location').value || ''
+                unit: document.getElementById('unit').value || '', // optional
+                location: document.getElementById('location').value || '' // optional
             };
             // Update the shoppingListData array
             const index = shoppingListData.findIndex(item => item.ingredient === ingredient);
             if (index > -1) {
                 shoppingListData[index] = updatedItem; // Update the item
                 alert('Item updated successfully!'); // Notification
-                // Optionally, you could navigate back to the main list or save the updated list
+                // Redirect back to the shopping list page
+                window.location.href = 'shopping_list.html'; // Change this to the actual path of your shopping list page
             }
         });
 
@@ -80,3 +81,4 @@
     </script>
 </body>
 </html>
+
