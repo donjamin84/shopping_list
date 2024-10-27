@@ -3,32 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Item</title>
+    <title>Shopping List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
-        form { display: flex; flex-direction: column; gap: 10px; }
+        table { width: 95%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        td:nth-child(1) { width: 25%; }
+        td:nth-child(2) { width: 15%; }
+        td:nth-child(3) { width: 15%; }
+        td:nth-child(4) { width: 30%; }
+        td:nth-child(5) { width: 10%; }
+        input[type="text"], input[type="number"] { width: 95%; }
+        .form-group { margin-bottom: 10px; }
+        #addItemForm { display: flex; flex-wrap: wrap; gap: 10px; }
+        .action-icons i { cursor: pointer; margin-right: 10px; }
     </style>
 </head>
 <body>
-    <h1>Edit Item</h1>
-    <form id="editItemForm">
-        <input type="hidden" id="ingredient" placeholder="Ingredient">
-        <input type="number" id="amount" placeholder="Amount" required>
-        <input type="text" id="unit" placeholder="Unit"> <!-- Optional -->
-        <input type="text" id="location" placeholder="Location"> <!-- Optional -->
-        <button type="submit">Update Item</button>
+    <h1>Shopping List</h1>
+    <table id="shoppingListTable">
+        <thead>
+            <tr>
+                <th>Ingredient</th>
+                <th>Amount</th>
+                <th>Unit</th>
+                <th>Location</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Rows will be populated here -->
+        </tbody>
+    </table>
+    <form id="addItemForm">
+        <div class="form-group">
+            <input type="text" id="ingredient" placeholder="Ingredient" required>
+        </div>
+        <div class="form-group">
+            <input type="number" id="amount" placeholder="Amount" required>
+        </div>
+        <div class="form-group">
+            <input type="text" id="unit" placeholder="Unit">
+        </div>
+        <div class="form-group">
+            <input type="text" id="location" placeholder="Location">
+        </div>
+        <button type="submit">Add Item</button>
     </form>
-
     <script>
-        // Get the ingredient parameter from the URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const ingredient = urlParams.get('ingredient');
+        const shoppingListData = [];
 
-        // Fetch existing data
-        let shoppingListData = [];
+        function populateTable() {
+            const tableBody = document.querySelector('#tableBody');
+            tableBody.innerHTML = '';
+            shoppingListData.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" value="${row.ingredient}" onchange="updateItem(${index}, 'ingredient', this.value)"></td>
+                    <td><input type="number" value="${row.amount}" onchange="updateItem(${index}, 'amount', this.value)"></td>
+                    <td>${row.unit}</td>
+                    <td><input type="text" value="${row.location}" onchange="updateItem(${index}, 'location', this.value)"></td>
+                    <td class="action-icons">
+                        <i class="fas fa-edit" onclick="editItem(${index})" title="Edit"></i>
+                        <i class="fas fa-trash" onclick="removeItem(${index})" title="Remove"></i>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            window.scrollTo(0, document.body.scrollHeight);
+        }
 
-        function fetchData() {
-            fetch('shopping_list.csv') // Change to your CSV file path if needed
+        function removeItem(index) {
+            shoppingListData.splice(index, 1);
+            populateTable();
+        }
+
+        document.getElementById('addItemForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const newItem = {
+                ingredient: document.getElementById('ingredient').value,
+                amount: document.getElementById('amount').value,
+                unit: document.getElementById('unit').value || '',
+                location: document.getElementById('location').value || ''
+            };
+            shoppingListData.push(newItem);
+            populateTable();
+            this.reset();
+        });
+
+        window.onload = function() {
+            fetch('shopping_list.csv')
                 .then(response => response.text())
                 .then(data => {
                     const rows = data.split('\n');
@@ -43,49 +109,13 @@
                             });
                         }
                     }
-                    populateForm();
+                    populateTable();
                 })
                 .catch(error => console.error('Error fetching the CSV file:', error));
-        }
-
-        function populateForm() {
-            const item = shoppingListData.find(item => item.ingredient === ingredient);
-            if (item) {
-                document.getElementById('ingredient').value = item.ingredient;
-                document.getElementById('amount').value = item.amount;
-                document.getElementById('unit').value = item.unit;
-                document.getElementById('location').value = item.location;
-            }
-        }
-
-        document.getElementById('editItemForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the form from submitting normally
-            
-            const updatedItem = {
-                ingredient: document.getElementById('ingredient').value,
-                amount: document.getElementById('amount').value,
-                unit: document.getElementById('unit').value || '', // optional
-                location: document.getElementById('location').value || '' // optional
-            };
-            
-            // Update the shoppingListData array
-            const index = shoppingListData.findIndex(item => item.ingredient === ingredient);
-            if (index > -1) {
-                shoppingListData[index] = updatedItem; // Update the item
-                alert('Item updated successfully!'); // Notification
-                
-                // OPTIONAL: Here you would save updated data back to CSV or other storage
-                // saveDataToCSV(shoppingListData); // Uncomment if needed
-                
-                // Redirect back to the shopping list page
-                window.location.href = 'shopping_list.html'; // Ensure this points to your shopping list page
-            }
-        });
-
-        // Fetch data when the page loads
-        window.onload = fetchData;
+        };
     </script>
 </body>
 </html>
+
 
 
