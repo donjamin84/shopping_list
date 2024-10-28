@@ -55,6 +55,7 @@
             font-weight: 400; /* Regular for ingredient text */
             font-size: 14px; /* Adjust the font size as needed */
             color: #333; /* Change the color as needed */
+            padding: 4px 0; /* Reduced padding for ingredients */
         }
         /* Popup styling */
         #editPopup {
@@ -85,6 +86,35 @@
             font-weight: 400; /* Thin for buttons */
             font-style: none; /* Italic for buttons */
         }
+        .add-item-button {
+            display: block; /* Display as block */
+            background-color: #007BFF; /* Blue background */
+            color: white; /* White text */
+            padding: 10px; /* Padding for the button */
+            border-radius: 5px; /* Rounded corners */
+            border: none; /* No border */
+            font-size: 16px; /* Font size */
+            cursor: pointer; /* Pointer cursor on hover */
+            margin-top: 10px; /* Margin above the button */
+            width: 60%; /* Match the width of the table */
+            text-align: left; /* Align text to the left */
+        }
+        .add-item-button:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+        .divider {
+            width: 60%; /* Match the width of the table */
+            border-top: 2px solid grey; /* Thicker grey color for the line */
+            margin: 0; /* No margin */
+            padding: 0; /* Remove padding */
+        }
+        hr {
+            width: 60%; /* Match the width of the table */
+            margin: 10px 0; /* Center the line */
+            border: 1px solid #007BFF; /* Blue color for the line */
+            align-self: flex-start; /* Align line to the left */
+            margin-left: 0; /* Align to the left */
+        }
     </style>
 </head>
 <body>
@@ -94,6 +124,8 @@
             <!-- Rows will be populated here -->
         </tbody>
     </table>
+    
+    <hr> <!-- Dividing line -->
     
     <form id="addItemForm">
         <div class="form-group">
@@ -108,7 +140,7 @@
         <div class="form-group">
             <input type="text" id="location" placeholder="Location" required> <!-- Optional -->
         </div>
-        <button type="submit">Add Item</button>
+        <button type="submit" class="add-item-button">Add Item</button> <!-- Styled button -->
     </form>
     
     <div id="editPopup" class="hidden">
@@ -156,12 +188,18 @@
                         <td class="data-text">${item.amount}</td>
                         <td class="data-text">${item.unit}</td>
                         <td class="action-buttons">
-			    <button onclick="openEditPopup(${shoppingListData.indexOf(item)})">✏️</button>
+                            <button onclick="openEditPopup(${shoppingListData.indexOf(item)})">✏️</button>
                             <button onclick="removeItem(${shoppingListData.indexOf(item)})">🗑️</button>
-                            
                         </td>
                     `;
                     tableBody.appendChild(tr);
+
+                    // Add a divider if this is not the last item in the group
+                    if (index < items.length - 1) {
+                        const divider = document.createElement('tr');
+                        divider.innerHTML = `<td colspan="4" class="divider"></td>`;
+                        tableBody.appendChild(divider);
+                    }
                 });
             }
         }
